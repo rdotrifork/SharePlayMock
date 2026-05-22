@@ -15,12 +15,12 @@ public class GroupSessionMessengerMock {
     private var sessionId: UUID
     var messenger: GroupSessionMessenger?
     
-    public init<Activity>(session: GroupSessionMock<Activity>) where Activity : GroupActivityMock {
+    public init<Activity>(session: GroupSessionMock<Activity>, deliveryMode: GroupSessionMessenger.DeliveryMode = .reliable) where Activity : GroupActivityMock {
         self.activityIdentifier = Activity.ActivityType.activityIdentifier
         self.sessionId = session.id
-        
+
         if let session = session.groupSession {
-            self.messenger = GroupSessionMessenger(session: session)
+            self.messenger = GroupSessionMessenger(session: session, deliveryMode: deliveryMode)
         }
     }
     
