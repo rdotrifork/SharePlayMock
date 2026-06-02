@@ -72,15 +72,15 @@ class MessageReceiverRegistry {
     func get<Message: Codable>(activityIdentifier: String, of type: Message.Type) -> GroupSessionMessengerMock.Messages<Message> {
         lock.lock()
         defer { lock.unlock() }
-        
+
         let typeName = String(describing: Message.Type.self)
         let key = activityIdentifier + "_" + typeName
-        if !map.keys.contains(key) {
-            let messages = GroupSessionMessengerMock.Messages<Message>()
-            map[key] = messages
-        }
-        
-        return map[key] as! GroupSessionMessengerMock.Messages<Message>
+        // Always create a new Messages for each session so the AsyncStream.Iterator
+        // is fresh. A cancelled iterator permanently returns nil, which would cause
+        // a second session's observer task to exit immediately and drop all messages.
+        let messages = GroupSessionMessengerMock.Messages<Message>()
+        map[key] = messages
+        return messages
     }
     
     func get(activityIdentifier: String, of typeName: String) -> MessageReceiver? {
